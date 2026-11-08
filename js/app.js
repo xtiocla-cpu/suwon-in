@@ -1,52 +1,12 @@
-const svgIcons={
- house:'<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M9 21v-8h6v8"/>',
- briefcase:'<rect x="3" y="7" width="18" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12c5 4 13 4 18 0"/>',
- book:'<path d="M12 7c-2-2-5-3-9-2v14c4-1 7 0 9 2 2-2 5-3 9-2V5c-4-1-7 0-9 2z"/><path d="M12 7v14"/>',
- users:'<circle cx="9" cy="8" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2M17 5a3 3 0 0 1 0 6M18 14a5 5 0 0 1 3 5v1"/>'
-};
-function iconSvg(name){return `<svg viewBox="0 0 24 24" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${svgIcons[name]||svgIcons.house}</svg>`}
-const categories=[
-{id:"living",title:"수원에서 살기",desc:"주거 · 금융 · 생활지원",icon:"house",tone:"#e3f0f3"},
-{id:"work",title:"수원에서 일하기",desc:"취업 · 창업 · 일자리",icon:"briefcase",tone:"#e8edf5"},
-{id:"learning",title:"수원에서 배우기",desc:"교육 · 자격증 · 자기개발",icon:"book",tone:"#f9e5e5"},
-{id:"connect",title:"수원에서 연결되기",desc:"청년공간 · 모임 · 지역활동",icon:"users",tone:"#fceeee"}
-];
-const sampleItems=[
-{category:"living",title:"온통청년 정책 검색",description:"전국 단위 청년정책과 지원사업을 검색하고 상세 자격을 확인할 수 있어요.",provider:"전국",source:"온통청년",url:"https://www.youthcenter.go.kr/main",tag:"정책"},
-{category:"living",title:"경기 청년정책 확인",description:"경기도 및 시군에서 운영하는 청년 지원사업을 확인해 보세요.",provider:"경기도",source:"경기청년포털",url:"https://youth.gg.go.kr/gg/index.do",tag:"정책"},
-{category:"living",title:"수원시 청년정책 안내",description:"수원시 청년 관련 정책과 유관기관 정보를 확인할 수 있어요.",provider:"수원시",source:"수원시",url:"https://www.suwon.go.kr/sw-www/deptHome/dep_edu/culture04/culture04-04.jsp",tag:"정책"},
-{category:"work",title:"청년 취업·진로 정책 찾기",description:"취업지원, 직업훈련, 진로상담 등 청년 대상 사업을 찾아보세요.",provider:"전국",source:"온통청년",url:"https://www.youthcenter.go.kr/main",tag:"취업"},
-{category:"work",title:"경기도 일자리·창업 정보",description:"경기도 청년 대상 취업 및 창업 관련 정보를 확인해 보세요.",provider:"경기도",source:"경기청년포털",url:"https://youth.gg.go.kr/gg/index.do",tag:"일자리"},
-{category:"learning",title:"수원시 평생학습 강좌",description:"시민을 위한 평생교육, 인문교양, 취미·역량개발 강좌를 살펴보세요.",provider:"수원시",source:"수원시 평생학습",url:"https://learning.suwon.go.kr/lmth/01_lecture01.asp",tag:"교육"},
-{category:"learning",title:"수원시 교육강좌 예약",description:"수원시에서 운영하는 교육 프로그램과 강좌를 확인하고 예약할 수 있어요.",provider:"수원시",source:"수원시 통합예약",url:"https://www.suwon.go.kr/web/reserv/edu/list.do",tag:"강좌"},
-{category:"connect",title:"청년공간·커뮤니티 정보 찾기",description:"청년공간, 교류 프로그램, 청년 참여 정보를 정책 포털에서 찾아보세요.",provider:"전국·경기도",source:"온통청년",url:"https://www.youthcenter.go.kr/main",tag:"커뮤니티"}
-];
-const categoryById=Object.fromEntries(categories.map(c=>[c.id,c]));
-const app=document.getElementById("app");
-const homeMarkup=app.innerHTML;
-function renderHome(){
- app.innerHTML=homeMarkup;
- document.getElementById("policyGrid").innerHTML=categories.map(c=>`<a class="category-card" href="#${c.id}"><span class="category-icon" style="background:${c.tone}">${iconSvg(c.icon)}</span><div><h3>${c.title}</h3></div><span class="card-arrow">↗</span></a>`).join("");
-}
-function resourceCard(item){return `<article class="resource-card"><div class="resource-meta"><span>${item.provider}</span><span>${item.tag}</span></div><h3>${item.title}</h3><p>${item.description}</p><a href="${item.url}" target="_blank" rel="noopener noreferrer">${item.source} 바로가기 ↗</a></article>`}
-function renderCategory(id){
- const c=categoryById[id];if(!c){location.hash="#home";return}
- const items=sampleItems.filter(x=>x.category===id);
- app.innerHTML=`<section class="page-hero"><h1>${c.title}</h1></section><section class="page-content"><div class="notice">각 사업의 신청 기간과 자격, 운영 여부는 공식 안내에서 최종 확인해 주세요.</div><div class="filter-row"><button class="filter-chip active" data-filter="전체">전체</button>${[...new Set(items.map(x=>x.tag))].map(t=>`<button class="filter-chip" data-filter="${t}">${t}</button>`).join("")}</div><div class="resource-grid" id="resourceGrid">${items.map(resourceCard).join("")}</div></section>`;
- document.querySelectorAll(".filter-chip").forEach(btn=>btn.addEventListener("click",()=>{document.querySelectorAll(".filter-chip").forEach(b=>b.classList.remove("active"));btn.classList.add("active");const f=btn.dataset.filter,shown=f==="전체"?items:items.filter(x=>x.tag===f);document.getElementById("resourceGrid").innerHTML=shown.map(resourceCard).join("")}));
-}
-function route(){
- const id=location.hash.replace("#","")||"home";
- document.querySelectorAll(".main-nav a[data-route]").forEach(a=>a.classList.toggle("active",a.dataset.route===id));
- const nav=document.getElementById("mainNav"),toggle=document.getElementById("menuToggle");nav.classList.remove("open");toggle.setAttribute("aria-expanded","false");
- if(id==="home"){renderHome();return}if(categoryById[id]){renderCategory(id);return}
- if(id==="enjoy"||id.startsWith("enjoy-")){
- const choices=[{id:"enjoy-food",name:"맛집"},{id:"enjoy-places",name:"명소"},{id:"enjoy-culture",name:"문화·축제"}];
- const chosen=choices.find(x=>x.id===id);
- app.innerHTML=`<section class="page-hero"><h1>${chosen?chosen.name:"수원에서 즐기기"}</h1></section><section class="page-content"><div class="enjoy-categories enjoy-page-links">${choices.map(x=>`<a class="enjoy-category" href="#${x.id}"><span>${x.name}</span><span class="enjoy-arrow">↗</span></a>`).join("")}</div><p class="enjoy-placeholder">${chosen?chosen.name+" 정보는":"맛집·명소·문화·축제 정보는"} 준비 중이에요. 추후 콘텐츠가 추가될 예정입니다.</p></section>`;
- return;
- }
- location.hash="#home";
-}
-document.getElementById("menuToggle").addEventListener("click",()=>{const nav=document.getElementById("mainNav");nav.classList.toggle("open");document.getElementById("menuToggle").setAttribute("aria-expanded",nav.classList.contains("open")?"true":"false")});
-window.addEventListener("hashchange",route);renderHome();route();
+const app=document.getElementById('app');
+const districts=['장안구','팔달구','영통구','권선구'];
+const keywords=['전체','맛집','카페','산책'];
+let selectedDistrict='장안구',selectedKeyword='전체';
+const icons={policy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>',place:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>'};
+function safe(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function hero(title,desc=''){return `<section class="page-intro"><a class="back" href="#home">← 홈으로</a><h1>${safe(title)}</h1>${desc?`<p>${safe(desc)}</p>`:''}</section>`}
+function home(){app.innerHTML=`<section class="landing-hero"><p class="eyebrow">장안청소년청년센터 X 청년네트워크기획단 청량(淸凉)</p><h1>수원에 잇다,<br><em>청년을 잇다!</em></h1><p>수원에서 시작하는 나의 일상</p></section><section class="landing-content"><div class="main-cards"><a class="main-card policy" href="#policies">${icons.policy}<div><h2>청년 지원 정책</h2><p>나에게 필요한 지원 찾기</p></div><span>↗</span></a><a class="main-card places" href="#places">${icons.place}<div><h2>관내 명소·맛집</h2><p>수원의 일상 즐기기</p></div><span>↗</span></a></div></section>`}
+function policies(){app.innerHTML=hero('청년 지원 정책','공식 사이트에서 나에게 필요한 정보를 찾아보세요.')+`<section class="content-area"><div class="info-note">정책별 신청 기간과 자격은 각 공식 사이트에서 확인해 주세요.</div><div class="policy-list">${window.SUWON_POLICIES.map(p=>`<a class="link-card" href="${safe(p.url)}" target="_blank" rel="noopener noreferrer"><span class="scope">${safe(p.scope)}</span><h2>${safe(p.name)}</h2><p>${safe(p.description)}</p><span class="visit">사이트 바로가기 ↗</span></a>`).join('')}</div></section>`}
+function places(){app.innerHTML=hero('관내 명소·맛집','지역과 키워드를 선택해 원하는 장소를 찾아보세요.')+`<section class="content-area"><div class="selector-label">지역 선택</div><div class="district-tabs" id="districtTabs"></div><div class="selector-label">키워드</div><div class="keyword-tabs" id="keywordTabs"></div><div class="results-heading"><h2 id="resultTitle"></h2><span id="resultCount"></span></div><div class="place-list" id="placeList"></div></section>`;drawPlaces()}
+function drawPlaces(){document.getElementById('districtTabs').innerHTML=districts.map(d=>`<button type="button" class="tab ${selectedDistrict===d?'active':''}" data-district="${d}" aria-pressed="${selectedDistrict===d}">${d}</button>`).join('');document.getElementById('keywordTabs').innerHTML=keywords.map(k=>`<button type="button" class="chip ${selectedKeyword===k?'active':''}" data-keyword="${k}" aria-pressed="${selectedKeyword===k}">${k}</button>`).join('');const shown=window.SUWON_PLACES.filter(p=>p.district===selectedDistrict&&(selectedKeyword==='전체'||p.category===selectedKeyword)).sort((a,b)=>a.name.localeCompare(b.name,'ko'));document.getElementById('resultTitle').textContent=selectedDistrict+' 장소 목록';document.getElementById('resultCount').textContent=`가나다순 · ${shown.length}곳`;document.getElementById('placeList').innerHTML=shown.length?shown.map(p=>`<article class="place-card"><div class="place-image">${p.image?`<img src="${safe(p.image)}" alt="${safe(p.name)} 대표 이미지" loading="lazy">`:icons.place}</div><div class="place-info"><span class="place-meta">${safe(p.neighborhood)} · #${safe(p.category)}</span><h3>${safe(p.name)}</h3><p>${safe(p.description)}</p><p class="address">${safe(p.address)}</p><a href="${safe(p.naverUrl)}" target="_blank" rel="noopener noreferrer">네이버지도 바로가기 ↗</a></div></article>`).join(''):`<div class="empty">아직 등록된 장소가 없어요.<br>다른 키워드나 지역을 선택해 보세요.</div>`;document.querySelectorAll('[data-district]').forEach(b=>b.addEventListener('click',()=>{selectedDistrict=b.dataset.district;selectedKeyword='전체';drawPlaces()}));document.querySelectorAll('[data-keyword]').forEach(b=>b.addEventListener('click',()=>{selectedKeyword=b.dataset.keyword;drawPlaces()}))}
+function route(){const hash=location.hash.replace('#','')||'home';if(hash==='policies')policies();else if(hash==='places')places();else home();window.scrollTo(0,0)}window.addEventListener('hashchange',route);route();
